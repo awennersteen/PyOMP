@@ -56,12 +56,15 @@ USE_CXX11_ABI = "1"
 PIP_NO_INPUT = "1"
 
 [tool.cibuildwheel.linux]
+repair-wheel-command = "auditwheel show {wheel} && auditwheel repair -w {dest_dir} {wheel}"
 before-all = [
     "yum install -y elfutils-libelf-devel libffi-devel patch",
     "bash buildscripts/cibuildwheel/setup-miniforge3.sh",
 ]
 
 [tool.cibuildwheel.linux.environment]
+# Conda's C++ runtime is newer than the manylinux system runtime.
+LDFLAGS = "-static-libstdc++ -static-libgcc"
 ENABLE_BUNDLED_LIBOMP = "1"
 ENABLE_BUNDLED_LIBOMPTARGET = "1"
 LLVM_DIR = "${PWD}/_stage/miniforge3/envs/llvmdev-${LLVM_VERSION}/lib/cmake/llvm"
