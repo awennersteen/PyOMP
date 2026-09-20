@@ -383,6 +383,9 @@ if _check_true("ENABLE_BUNDLED_LIBOMPTARGET"):
                     cmake_args=[
                         f"-DLLVM_DEFAULT_TARGET_TRIPLE={target}",
                         "-DLLVM_INCLUDE_TESTS=OFF",
+                        # Host CPU flags from Conda do not apply to GPU bitcode.
+                        "-DCMAKE_C_FLAGS=",
+                        "-DCMAKE_CXX_FLAGS=",
                     ],
                 )
             )
