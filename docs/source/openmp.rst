@@ -348,7 +348,13 @@ Once you have identified a device ID, you can use it in OpenMP target directives
 Version and platform support
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following table shows tested combinations of PyOMP, Numba, Python, LLVM, and supported platforms:
+The LLVM 22 development branch targets Numba 0.66.x and llvmlite 0.48.x.
+Local validation covers Linux x86_64, Python 3.12, CPU parallelism, and
+mandatory host-device offload. Four basic GPU tests pass on an NVIDIA RTX 3080
+with CUDA 12.8 tools; the full GPU suite and other platforms remain unverified
+for this branch. See :doc:`installation` for build and GPU test details.
+
+The following table describes released versions of PyOMP:
 
 .. table::
    :widths: auto

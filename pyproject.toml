@@ -57,7 +57,7 @@ PIP_NO_INPUT = "1"
 
 [tool.cibuildwheel.linux]
 before-all = [
-    "yum install -y elfutils-libelf-devel libffi-devel clang-devel-20.1.8 llvm-devel-20.1.8",
+    "yum install -y elfutils-libelf-devel libffi-devel clang-devel-22.1.8 llvm-devel-22.1.8 lld-22.1.8 patch",
 ]
 
 [tool.cibuildwheel.linux.environment]
