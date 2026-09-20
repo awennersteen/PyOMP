@@ -20,7 +20,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       CONDA_LABEL: dev
+      ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
     strategy:
+      fail-fast: false
       matrix:
         # TODO: Add windows.
         os: [ubuntu-latest, macos-latest, ubuntu-24.04-arm]
@@ -53,7 +55,7 @@ jobs:
           auto-update-conda: false
           show-channel-urls: true
 
-      - name: Build and upload pyomp
+      - name: Build and test pyomp
         # This ensures conda env is active.
         shell: bash -l {0}
         run: |
@@ -68,13 +70,17 @@ jobs:
             --python ${{ matrix.python-version }} \
             buildscripts/conda-recipes/pyomp
 
+      - name: Upload pyomp
+        if: env.ANACONDA_TOKEN != ''
+        shell: bash -l {0}
+        run: |
           # Get the output file path.
           OUTPUT=$(conda build -c conda-forge --output \
             --python ${{ matrix.python-version }} \
             buildscripts/conda-recipes/pyomp)
 
           # Upload the package.
-          conda run -n base anaconda -t ${{ secrets.ANACONDA_TOKEN }} upload \
+          conda run -n base anaconda -t "$ANACONDA_TOKEN" upload \
             --user python-for-hpc --label ${{ env.CONDA_LABEL}} \
             --force "$OUTPUT"
 
