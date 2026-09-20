@@ -59,18 +59,20 @@ and AMDGPU bitcode are included in the Linux wheel. Set
 ``ENABLE_BUNDLED_LIBOMP=0`` when using an existing LLVM OpenMP runtime, as in
 the Conda recipe. ``CMAKE_BUILD_PARALLEL_LEVEL`` controls build concurrency.
 
-Validation is limited to Linux x86_64 with Python 3.12, Numba 0.66.0,
-llvmlite 0.48.0 (LLVM 22.1.0), and Clang/runtime 22.1.8. The host suite
-ran 235 tests with 120 passing and 115 existing skips, including disabled
-target tests and unsupported clauses. The separate mandatory host-device run
-ran 72 tests with 68 passing and 4 existing skips.
+Wheel and Conda CPU tests pass on Linux x86_64, Linux ARM64, and macOS ARM64 with Python
+3.10–3.14 and Numba 0.66.0. On Linux, the host suite runs 235 tests with
+120 passing and 115 existing skips, including disabled target tests and
+unsupported clauses. The separate mandatory host-device run passes 68 tests
+with 4 existing skips. On macOS, the host suite passes 119 tests with 116 skips;
+all 72 target tests are skipped because offloading is unsupported there.
+Local validation also passes with Python 3.12, llvmlite 0.48.0 (LLVM 22.1.0),
+and Clang/runtime 22.1.8.
 Four basic GPU tests also pass on an NVIDIA RTX 3080 (sm_86), driver 595.84,
 using CUDA 12.8.93 compiler tools: teams/distribute/parallel-for, tofrom
 mapping, explicit updates, and a parallel reduction. These use mandatory
 offload and select the NVIDIA device; CPU fallback is not counted as success.
 The full GPU suite, other GPUs (including Blackwell), CUDA 13 compiler tools,
-macOS, Linux ARM64, Conda packages, and the wider Python CI matrix remain
-unverified.
+and other operating systems and architectures remain unverified.
 This update does not add target ``nowait``/``depend`` support.
 
 To repeat the basic NVIDIA checks with an installed wheel, expose the NVIDIA

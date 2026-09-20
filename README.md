@@ -44,10 +44,11 @@ conda install -c python-for-hpc -c conda-forge pyomp
 ### LLVM 22 development branch
 
 This branch targets Numba 0.66.x and llvmlite 0.48.x with LLVM 22.1.8.
-It is a source port, not a published PyOMP release. Linux x86_64 CPU execution
-and host-device offload are tested with Python 3.12. Four basic NVIDIA GPU
-offload tests also pass on an RTX 3080 with CUDA 12.8 tools. The full GPU suite,
-other GPUs, macOS, Linux ARM64, and the wider Python CI matrix remain unverified.
+It is a source port, not a published PyOMP release. Wheel and Conda CI cover Python
+3.10–3.14 on Linux x86_64, Linux ARM64, and macOS ARM64. CPU execution is tested
+on all three platforms, with mandatory host-device offload on Linux. Four basic
+NVIDIA GPU offload tests also pass on an RTX 3080 with CUDA 12.8 tools.
+The full GPU suite, other GPUs, and CUDA 13 compiler tools remain unverified.
 See [source build and validation instructions](docs/source/installation.rst).
 The released-version compatibility table below remains historical.
 
