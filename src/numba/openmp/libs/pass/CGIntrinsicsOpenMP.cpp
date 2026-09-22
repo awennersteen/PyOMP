@@ -854,7 +854,7 @@ void CGIntrinsicsOpenMP::emitOMPParallelDeviceRuntime(
 
   assert(NumThreads && "Expected non-null NumThreads");
 
-  FunctionCallee KmpcParallel51 =
+  FunctionCallee KmpcParallel60 =
       OMPBuilder.getOrCreateRuntimeFunction(M, OMPRTL___kmpc_parallel_60);
 
   // Set proc_bind to -1 by default as it is unused.
@@ -885,9 +885,9 @@ void CGIntrinsicsOpenMP::emitOMPParallelDeviceRuntime(
                                    NumCapturedArgs};
   Args.push_back(OMPBuilder.Builder.getInt32(0)); // Non-strict num_threads.
 
-  auto *CallKmpcParallel51 =
-      checkCreateCall(OMPBuilder.Builder, KmpcParallel51, Args);
-  assert(CallKmpcParallel51 &&
+  auto *CallKmpcParallel60 =
+      checkCreateCall(OMPBuilder.Builder, KmpcParallel60, Args);
+  assert(CallKmpcParallel60 &&
          "Expected non-null call instr from code generation");
 
   FunctionCallee KmpcFreeShared =

@@ -363,6 +363,7 @@ if _check_true("ENABLE_BUNDLED_LIBOMPTARGET"):
             cmake_args=[
                 "-DOPENMP_STANDALONE_BUILD=ON",
                 "-DLLVM_ENABLE_RUNTIMES=offload",
+                "-DLLVM_INCLUDE_TESTS=OFF",
                 # Avoid conflicts in manylinux builds with packaged clang/llvm
                 # under /usr/include and its gcc-toolset provided header files.
                 "-DCMAKE_NO_SYSTEM_FROM_IMPORTED=ON",
@@ -380,6 +381,7 @@ if _check_true("ENABLE_BUNDLED_LIBOMPTARGET"):
                 install_dir="openmp",
                 cmake_args=[
                     f"-DLLVM_DEFAULT_TARGET_TRIPLE={target}",
+                    "-DLLVM_INCLUDE_TESTS=OFF",
                     # Host CPU flags from Conda do not apply to GPU bitcode.
                     "-DCMAKE_C_FLAGS=",
                     "-DCMAKE_CXX_FLAGS=",
