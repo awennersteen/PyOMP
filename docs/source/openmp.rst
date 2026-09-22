@@ -348,14 +348,7 @@ Once you have identified a device ID, you can use it in OpenMP target directives
 Version and platform support
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The LLVM 22 development branch targets Numba 0.66.x and llvmlite 0.48.x.
-Wheel and Conda CI cover Python 3.10–3.14 and CPU parallelism on Linux x86_64, Linux
-ARM64, and macOS ARM64, with mandatory host-device offload on Linux.
-Four basic GPU tests pass on an NVIDIA RTX 3080 with CUDA 12.8 tools;
-the full GPU suite and other GPUs remain unverified for this branch.
-See :doc:`installation` for build and GPU test details.
-
-The following table describes released versions of PyOMP:
+The following table shows tested combinations of PyOMP, Numba, Python, LLVM, and supported platforms:
 
 .. table::
    :widths: auto
@@ -363,6 +356,7 @@ The following table describes released versions of PyOMP:
    ===================== ==================== ==================== ============ ================================
    PyOMP                 Numba                Python               LLVM         Supported Platforms
    ===================== ==================== ==================== ============ ================================
+   0.6.x                 0.66.x               3.10 - 3.14          22.x         linux-64, osx-arm64, linux-arm64
    0.5.x                 0.62.x - 0.63.x      3.10 - 3.14          20.x         linux-64, osx-arm64, linux-arm64
    0.4.x                 0.61.x               3.10 - 3.13          15.x         linux-64, osx-arm64, linux-arm64
    0.3.x                 0.57.x - 0.60.x      3.9 - 3.12           14.x         linux-64, osx-arm64, linux-arm64

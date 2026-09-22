@@ -41,21 +41,11 @@ PyOMP is also distributed through Conda, installable using the following command
 conda install -c python-for-hpc -c conda-forge pyomp
 ```
 
-### LLVM 22 development branch
-
-This branch targets Numba 0.66.x and llvmlite 0.48.x with LLVM 22.1.8.
-It is a source port, not a published PyOMP release. Wheel and Conda CI cover Python
-3.10–3.14 on Linux x86_64, Linux ARM64, and macOS ARM64. CPU execution is tested
-on all three platforms, with mandatory host-device offload on Linux. Four basic
-NVIDIA GPU offload tests also pass on an RTX 3080 with CUDA 12.8 tools.
-The full GPU suite, other GPUs, and CUDA 13 compiler tools remain unverified.
-See [source build and validation instructions](docs/source/installation.rst).
-The released-version compatibility table below remains historical.
-
 ### Compatibility matrix
 
 | PyOMP | Numba           |
 | ----- | --------------- |
+| 0.6.x | 0.66.x          |
 | 0.5.x | 0.62.x - 0.63.x |
 | 0.4.x | 0.61.x          |
 | 0.3.x | 0.57.x - 0.60.x |

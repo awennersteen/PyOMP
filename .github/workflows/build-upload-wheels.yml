@@ -32,7 +32,6 @@ jobs:
   build-wheels:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         # TODO: Add windows.
         os: [ubuntu-latest, macos-latest, ubuntu-24.04-arm]
@@ -83,7 +82,6 @@ jobs:
     needs: build-wheels
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, ubuntu-24.04-arm]
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']

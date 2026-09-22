@@ -1,39 +1,41 @@
 --- a/offload/include/device.h
 +++ b/offload/include/device.h
-@@ -15,6 +15,8 @@
- 
- #include <cassert>
- #include <cstddef>
-+#include "llvm/Support/raw_ostream.h"
-+
+@@ -18,6 +18,7 @@
  #include <cstdint>
  #include <cstring>
  #include <list>
-@@ -128,7 +130,7 @@
++#include <llvm/Support/raw_ostream.h>
+ #include <map>
+ #include <memory>
+ #include <mutex>
+@@ -128,7 +129,7 @@
    int32_t queryAsync(AsyncInfoTy &AsyncInfo);
  
    /// Calls the corresponding print device info function in the plugin.
 -  bool printDeviceInfo();
-+  bool printDeviceInfo(llvm::raw_ostream &OS = llvm::outs());
++  bool printDeviceInfo(llvm::raw_ostream *OS = nullptr);
  
    /// Event related interfaces.
    /// {
 --- a/offload/plugins-nextgen/common/include/PluginInterface.h
 +++ b/offload/plugins-nextgen/common/include/PluginInterface.h
-@@ -247,43 +247,43 @@
+@@ -247,43 +247,46 @@
    }
  
    /// Print all info entries in the tree
 -  void print() const {
-+  void print(llvm::raw_ostream &OS = llvm::outs()) const {
++  void print(llvm::raw_ostream *OS = nullptr) const {
++    // Choose output stream: provided one or llvm::outs().
++    llvm::raw_ostream &Out = OS ? *OS : llvm::outs();
++
      // Fake an additional indent so that values are offset from the keys
 -    doPrint(0, maxKeySize(1));
-+    doPrint(OS, 0, maxKeySize(1));
++    doPrint(0, maxKeySize(1), Out);
    }
  
  private:
 -  void doPrint(int Level, uint64_t MaxKeySize) const {
-+  void doPrint(llvm::raw_ostream &OS, int Level, uint64_t MaxKeySize) const {
++  void doPrint(int Level, uint64_t MaxKeySize, llvm::raw_ostream &Out) const {
      if (Key.size()) {
        // Compute the indentations for the current entry.
        uint64_t KeyIndentSize = Level * IndentSize;
@@ -41,21 +43,21 @@
            MaxKeySize - (Key.size() + KeyIndentSize) + IndentSize;
  
 -      llvm::outs() << std::string(KeyIndentSize, ' ') << Key
-+      OS << std::string(KeyIndentSize, ' ') << Key
++      Out << std::string(KeyIndentSize, ' ') << Key
                     << std::string(ValIndentSize, ' ');
        std::visit(
 -          [](auto &&V) {
-+          [&OS](auto &&V) {
++          [&Out](auto &&V) {
              using T = std::decay_t<decltype(V)>;
              if constexpr (std::is_same_v<T, std::string>)
 -              llvm::outs() << V;
-+              OS << V;
++              Out << V;
              else if constexpr (std::is_same_v<T, bool>)
 -              llvm::outs() << (V ? "Yes" : "No");
-+              OS << (V ? "Yes" : "No");
++              Out << (V ? "Yes" : "No");
              else if constexpr (std::is_same_v<T, uint64_t>)
 -              llvm::outs() << V;
-+              OS << V;
++              Out << V;
              else if constexpr (std::is_same_v<T, std::monostate>) {
                // Do nothing
              } else
@@ -63,32 +65,32 @@
            },
            Value);
 -      llvm::outs() << (Units.empty() ? "" : " ") << Units << "\n";
-+      OS << (Units.empty() ? "" : " ") << Units << "\n";
++      Out << (Units.empty() ? "" : " ") << Units << "\n";
      }
  
      // Print children
      if (Children)
        for (const auto &Entry : *Children)
 -        Entry.doPrint(Level + 1, MaxKeySize);
-+        Entry.doPrint(OS, Level + 1, MaxKeySize);
++        Entry.doPrint(Level + 1, MaxKeySize, Out);
    }
  
    // Recursively calculates the maximum width of each key, including indentation
-@@ -999,7 +999,7 @@
+@@ -999,7 +1002,7 @@
    virtual Expected<InfoTreeNode> obtainInfoImpl() = 0;
  
    /// Print information about the device.
 -  Error printInfo();
-+  Error printInfo(llvm::raw_ostream &OS = llvm::outs());
++  Error printInfo(llvm::raw_ostream *OS = nullptr);
  
    /// Return true if the device has work that is either queued or currently
    /// running
-@@ -1499,7 +1499,7 @@
+@@ -1499,7 +1502,7 @@
    int32_t query_async(int32_t DeviceId, __tgt_async_info *AsyncInfoPtr);
  
    /// Prints information about the given devices supported by the plugin.
 -  void print_device_info(int32_t DeviceId);
-+  void print_device_info(int32_t DeviceId, llvm::raw_ostream &OS = llvm::outs());
++  void print_device_info(int32_t DeviceId, llvm::raw_ostream *OS = nullptr);
  
    /// Creates an event in the given plugin if supported.
    int32_t create_event(int32_t DeviceId, void **EventPtr);
@@ -99,7 +101,7 @@
  }
  
 -Error GenericDeviceTy::printInfo() {
-+Error GenericDeviceTy::printInfo(llvm::raw_ostream &OS) {
++Error GenericDeviceTy::printInfo(llvm::raw_ostream *OS) {
    auto InfoOrErr = obtainInfo();
  
    // Get the vendor-specific info entries describing the device properties.
@@ -118,20 +120,28 @@
  
 -void GenericPluginTy::print_device_info(int32_t DeviceId) {
 -  if (auto Err = getDevice(DeviceId).printInfo())
-+void GenericPluginTy::print_device_info(int32_t DeviceId, llvm::raw_ostream &OS) {
++void GenericPluginTy::print_device_info(int32_t DeviceId, raw_ostream *OS) {
 +  if (auto Err = getDevice(DeviceId).printInfo(OS))
      REPORT() << "Failure to print device " << DeviceId
               << " info: " << toString(std::move(Err));
  }
 --- a/offload/libomptarget/device.cpp
 +++ b/offload/libomptarget/device.cpp
-@@ -345,8 +345,8 @@
+@@ -24,6 +24,7 @@
+ 
+ #include "Shared/EnvironmentVar.h"
+ #include "llvm/Support/Error.h"
++#include "llvm/Support/raw_ostream.h"
+ 
+ #include <cassert>
+ #include <climits>
+@@ -345,8 +346,8 @@
  }
  
  // Run region on device
 -bool DeviceTy::printDeviceInfo() {
 -  RTL->print_device_info(RTLDeviceID);
-+bool DeviceTy::printDeviceInfo(llvm::raw_ostream &OS) {
++bool DeviceTy::printDeviceInfo(llvm::raw_ostream *OS) {
 +  RTL->print_device_info(RTLDeviceID, OS);
    return true;
  }
@@ -148,21 +158,30 @@
      omp_get_interop_int;
 --- a/offload/libomptarget/interface.cpp
 +++ b/offload/libomptarget/interface.cpp
-@@ -530,6 +530,20 @@
+@@ -25,6 +25,7 @@
+ #include "Utils/ExponentialBackoff.h"
+ 
+ #include "llvm/Frontend/OpenMP/OMPConstants.h"
++#include "llvm/Support/raw_ostream.h"
+ 
+ #include <cassert>
+ #include <cstdint>
+@@ -530,6 +531,21 @@
    return DeviceOrErr->printDeviceInfo();
  }
  
 +EXTERN int __tgt_get_device_info(int64_t DeviceId,
-+                                void (*CopyCallback)(const char *, size_t)) {
++                                 void (*CopyCallback)(const char *, size_t)) {
 +  assert(PM && "Runtime not initialized");
 +  auto DeviceOrErr = PM->getDevice(DeviceId);
 +  if (!DeviceOrErr)
 +    FATAL_MESSAGE(DeviceId, "%s", toString(DeviceOrErr.takeError()).c_str());
 +
 +  std::string DeviceInfoStr;
-+  llvm::raw_string_ostream OS(DeviceInfoStr);
-+  bool Ret = DeviceOrErr->printDeviceInfo(OS);
++  llvm::raw_string_ostream OS{DeviceInfoStr};
++  bool Ret = DeviceOrErr->printDeviceInfo(&OS);
 +  CopyCallback(DeviceInfoStr.c_str(), DeviceInfoStr.size());
++
 +  return Ret;
 +}
 +
