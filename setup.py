@@ -120,7 +120,7 @@ class BuildCMakeExt(build_ext):
 
         print("Build at dir ", build_dir)
         subprocess.run(
-            ["cmake", "--build", build_dir], check=True, stdin=subprocess.DEVNULL
+            ["cmake", "--build", build_dir, "-j"], check=True, stdin=subprocess.DEVNULL
         )
         print("Install at dir ", install_dir)
         subprocess.run(

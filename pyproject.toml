@@ -56,7 +56,6 @@ USE_CXX11_ABI = "1"
 PIP_NO_INPUT = "1"
 
 [tool.cibuildwheel.linux]
-repair-wheel-command = "auditwheel show {wheel} && auditwheel repair -w {dest_dir} {wheel}"
 before-all = [
     "yum install -y elfutils-libelf-devel libffi-devel patch",
     "bash buildscripts/cibuildwheel/setup-miniforge3.sh",
