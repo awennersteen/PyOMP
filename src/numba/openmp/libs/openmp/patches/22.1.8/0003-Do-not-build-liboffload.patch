@@ -1,0 +1,10 @@
+--- a/offload/CMakeLists.txt
++++ b/offload/CMakeLists.txt
+@@ -391,7 +391,6 @@
+ # Build target agnostic offloading library.
+ add_subdirectory(libomptarget)
+ 
+-add_subdirectory(liboffload)
+ 
+ # Add tests.
+ if(OFFLOAD_INCLUDE_TESTS)

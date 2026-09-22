@@ -84,6 +84,10 @@ class BuildCMakeExt(build_ext):
             lib_dir = Path(self.build_lib) / "numba/openmp/libs"
 
         extra_cmake_args = self._env_toolchain_args(ext)
+        if ext.name.startswith("libompdevice-"):
+            extra_cmake_args.append(
+                f"-DLLVM_LIBRARY_OUTPUT_INTDIR={build_dir.absolute() / 'lib'}"
+            )
         # Set RPATH.
         if sys.platform.startswith("linux"):
             extra_cmake_args.append(r"-DCMAKE_INSTALL_RPATH=$ORIGIN")
@@ -359,12 +363,31 @@ if _check_true("ENABLE_BUNDLED_LIBOMPTARGET"):
             cmake_args=[
                 "-DOPENMP_STANDALONE_BUILD=ON",
                 "-DLLVM_ENABLE_RUNTIMES=offload",
+                "-DLLVM_INCLUDE_TESTS=OFF",
                 # Avoid conflicts in manylinux builds with packaged clang/llvm
                 # under /usr/include and its gcc-toolset provided header files.
                 "-DCMAKE_NO_SYSTEM_FROM_IMPORTED=ON",
             ],
         )
     )
+
+    # LLVM 22 builds GPU device bitcode separately from libomptarget.
+    for target in ("nvptx64-nvidia-cuda", "amdgcn-amd-amdhsa"):
+        ext_modules.append(
+            CMakeExtension(
+                f"libompdevice-{target}",
+                setup=PrepareOpenMP,
+                source_dir=PrepareOpenMP.get_source_dir().parent / "openmp",
+                install_dir="openmp",
+                cmake_args=[
+                    f"-DLLVM_DEFAULT_TARGET_TRIPLE={target}",
+                    "-DLLVM_INCLUDE_TESTS=OFF",
+                    # Host CPU flags from Conda do not apply to GPU bitcode.
+                    "-DCMAKE_C_FLAGS=",
+                    "-DCMAKE_CXX_FLAGS=",
+                ],
+            )
+        )
 
 
 setup(

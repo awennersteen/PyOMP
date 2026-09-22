@@ -422,7 +422,9 @@ struct CGReduction {
         {ReductionTy, Orig, Priv, OpenMPIRBuilder::EvalKind::Scalar,
          CGReduction::reductionNonAtomic<ReductionOperator>,
          /* ReductionGenClang */ nullptr,
-         CGReduction::reductionAtomic<ReductionOperator>});
+         CGReduction::reductionAtomic<ReductionOperator>,
+         /* DataPtrPtrGen */ nullptr,
+        });
 #endif
 
     return Priv;
