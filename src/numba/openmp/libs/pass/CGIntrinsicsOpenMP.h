@@ -423,9 +423,7 @@ struct CGReduction {
          CGReduction::reductionNonAtomic<ReductionOperator>,
          /* ReductionGenClang */ nullptr,
          CGReduction::reductionAtomic<ReductionOperator>,
-#if LLVM_VERSION_MAJOR >= 22
          /* DataPtrPtrGen */ nullptr,
-#endif
         });
 #endif
 

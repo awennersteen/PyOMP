@@ -538,11 +538,9 @@ OutlinedInfoStruct CGIntrinsicsOpenMP::createOutlinedFunction(
 }
 
 CGIntrinsicsOpenMP::CGIntrinsicsOpenMP(Module &M) : OMPBuilder(M), M(M) {
-#if LLVM_VERSION_MAJOR >= 22
   bool IsGPU = isOpenMPDeviceRuntime();
   OMPBuilder.Config = OpenMPIRBuilderConfig(
       IsGPU, IsGPU, false, false, false, false, false);
-#endif
   OMPBuilder.initialize();
 
   TgtOffloadEntryTy = StructType::create({OMPBuilder.Int8Ptr,
@@ -857,11 +855,7 @@ void CGIntrinsicsOpenMP::emitOMPParallelDeviceRuntime(
   assert(NumThreads && "Expected non-null NumThreads");
 
   FunctionCallee KmpcParallel51 =
-#if LLVM_VERSION_MAJOR >= 22
       OMPBuilder.getOrCreateRuntimeFunction(M, OMPRTL___kmpc_parallel_60);
-#else
-      OMPBuilder.getOrCreateRuntimeFunction(M, OMPRTL___kmpc_parallel_51);
-#endif
 
   // Set proc_bind to -1 by default as it is unused.
   assert(Ident && "Expected non-null Ident");
@@ -889,9 +883,7 @@ void CGIntrinsicsOpenMP::emitOMPParallelDeviceRuntime(
                                    OutlinedWrapperFnBitcast,
                                    CapturedVarAddrsBitcast,
                                    NumCapturedArgs};
-#if LLVM_VERSION_MAJOR >= 22
   Args.push_back(OMPBuilder.Builder.getInt32(0)); // Non-strict num_threads.
-#endif
 
   auto *CallKmpcParallel51 =
       checkCreateCall(OMPBuilder.Builder, KmpcParallel51, Args);
@@ -2328,9 +2320,7 @@ void CGIntrinsicsOpenMP::emitOMPTargetHost(
       KernelNumThreads,
       Constant::getNullValue(OMPBuilder.VoidPtr),
       /*TargetInfo.NoWait*/ false,
-#if LLVM_VERSION_MAJOR >= 22
       omp::OMPDynGroupprivateFallbackType::Abort,
-#endif
   };
   OpenMPIRBuilder::getKernelArgsVector(Args, OMPBuilder.Builder, ArgsVector);
 
