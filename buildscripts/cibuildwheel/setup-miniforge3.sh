@@ -60,4 +60,4 @@ source "_stage/miniforge3/bin/activate" base
 
 # Create conda environment with tools and libraries for the LLVM_VERSION.
 echo "Installing llvmdev ${LLVM_VERSION}..."
-conda create -n llvmdev-${LLVM_VERSION} --override-channels -c conda-forge -q -y clang=${LLVM_VERSION} clangxx=${LLVM_VERSION} clang-tools=${LLVM_VERSION} llvmdev=${LLVM_VERSION} zstd
+conda create -n llvmdev-${LLVM_VERSION} --override-channels -c conda-forge -q -y clang=${LLVM_VERSION} clangxx=${LLVM_VERSION} clang-tools=${LLVM_VERSION} llvmdev=${LLVM_VERSION} lld=${LLVM_VERSION} zstd
